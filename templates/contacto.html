@@ -52,11 +52,11 @@
 
             <h2>Envíanos un mensaje</h2>
 
-            <form>
-                <input type="text" placeholder="Nombre completo" required>
-                <input type="email" placeholder="Correo electrónico" required>
-                <input type="text" placeholder="Teléfono">
-                <textarea placeholder="Escribe tu mensaje..." required></textarea>
+            <form id="contacto-form">
+                <input id="nombre" type="text" placeholder="Nombre completo" autocomplete="name" required>
+                <input id="correo" type="email" placeholder="Correo electrónico" autocomplete="email" required>
+                <input id="telefono" type="tel" placeholder="Teléfono" autocomplete="tel">
+                <textarea id="mensaje" placeholder="Escribe tu mensaje..." required></textarea>
                 <button type="submit">Enviar mensaje</button>
             </form>
 
@@ -70,6 +70,38 @@
 <a href="https://wa.me/51920493433" class="whatsapp-float" target="_blank" rel="noopener" aria-label="WhatsApp">
     <i class="fab fa-whatsapp"></i>
 </a>
+
+<script>
+    const contactoForm = document.getElementById("contacto-form");
+
+    contactoForm.addEventListener("submit", function(event) {
+        event.preventDefault();
+
+        if (!contactoForm.checkValidity()) {
+            contactoForm.reportValidity();
+            return;
+        }
+
+        const nombre = document.getElementById("nombre").value.trim();
+        const correo = document.getElementById("correo").value.trim();
+        const telefono = document.getElementById("telefono").value.trim();
+        const mensaje = document.getElementById("mensaje").value.trim();
+
+        const texto = [
+            "Hola, quiero solicitar informacion.",
+            "",
+            `Nombre: ${nombre}`,
+            `Correo: ${correo}`,
+            telefono ? `Telefono: ${telefono}` : null,
+            "",
+            `Mensaje: ${mensaje}`
+        ].filter(Boolean).join("\n");
+
+        const whatsappUrl = `https://wa.me/51920493433?text=${encodeURIComponent(texto)}`;
+        window.open(whatsappUrl, "_blank", "noopener");
+        contactoForm.reset();
+    });
+</script>
 
 </body>
 </html>
