@@ -53,11 +53,12 @@
             <h2>Envíanos un mensaje</h2>
 
             <form id="contacto-form">
-                <input id="nombre" type="text" placeholder="Nombre completo" autocomplete="name" required>
-                <input id="correo" type="email" placeholder="Correo electrónico" autocomplete="email" required>
-                <input id="telefono" type="tel" placeholder="Teléfono" autocomplete="tel">
-                <textarea id="mensaje" placeholder="Escribe tu mensaje..." required></textarea>
+                <input id="nombre" name="nombre" type="text" placeholder="Nombre completo" autocomplete="name" required>
+                <input id="correo" name="correo" type="email" placeholder="Correo electrónico" autocomplete="email" required>
+                <input id="telefono" name="telefono" type="tel" placeholder="Teléfono" autocomplete="tel">
+                <textarea id="mensaje" name="mensaje" placeholder="Escribe tu mensaje..." required></textarea>
                 <button type="submit">Enviar mensaje</button>
+                <p id="form-status" class="form-status" aria-live="polite"></p>
             </form>
 
         </div>
@@ -73,8 +74,10 @@
 
 <script>
     const contactoForm = document.getElementById("contacto-form");
+    const formStatus = document.getElementById("form-status");
+    const submitButton = contactoForm.querySelector("button");
 
-    contactoForm.addEventListener("submit", function(event) {
+    contactoForm.addEventListener("submit", async function(event) {
         event.preventDefault();
 
         if (!contactoForm.checkValidity()) {
@@ -87,19 +90,34 @@
         const telefono = document.getElementById("telefono").value.trim();
         const mensaje = document.getElementById("mensaje").value.trim();
 
-        const texto = [
-            "Hola, quiero solicitar informacion.",
-            "",
-            `Nombre: ${nombre}`,
-            `Correo: ${correo}`,
-            telefono ? `Telefono: ${telefono}` : null,
-            "",
-            `Mensaje: ${mensaje}`
-        ].filter(Boolean).join("\n");
+        submitButton.disabled = true;
+        formStatus.className = "form-status";
+        formStatus.textContent = "Enviando mensaje...";
 
-        const whatsappUrl = `https://wa.me/51920493433?text=${encodeURIComponent(texto)}`;
-        window.open(whatsappUrl, "_blank", "noopener");
-        contactoForm.reset();
+        try {
+            const response = await fetch("/contacto", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ nombre, correo, telefono, mensaje })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || "No se pudo enviar el mensaje.");
+            }
+
+            formStatus.className = "form-status success";
+            formStatus.textContent = data.message;
+            contactoForm.reset();
+        } catch (error) {
+            formStatus.className = "form-status error";
+            formStatus.textContent = error.message;
+        } finally {
+            submitButton.disabled = false;
+        }
     });
 </script>
 
